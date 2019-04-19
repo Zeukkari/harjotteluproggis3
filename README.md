@@ -1,5 +1,7 @@
 # GraphQL-treenausta
 
+https://devhints.io/graphql
+
 https://www.digitraffic.fi/rautatieliikenne/#graphql
 
 https://www.predic8.de/graphql-query-samples.htm
@@ -7,6 +9,9 @@ https://www.predic8.de/graphql-query-samples.htm
 https://alligator.io/graphql/introduction-graphql-queries/
 
 https://graphql.github.io/learn/queries/
+
+https://blog.hashvel.com/posts/learn-graphql-query-alias-fragments-variables-directives-with-examples/
+
 
 ## Testiqueryjä
 
