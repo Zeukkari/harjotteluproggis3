@@ -64,3 +64,39 @@ https://blog.hashvel.com/posts/learn-graphql-query-alias-fragments-variables-dir
 }
 
 ```
+
+
+
+```
+{
+  viewer {
+    getTrainsByDepartureDateUsingGET(departure_date: "2017-12-28") {
+      cancelled
+      commuterLineID
+      deleted
+      operatorShortCode
+    }
+    getCompositionByTrainNumberAndDepartureDateUsingGET(train_number: "1", departure_date: "2017-12-28") {
+      departureDate
+      journeySections{
+        beginTimeTableRow {
+          scheduledTime
+          stationShortCode
+          stationUICCode
+        }
+        endTimeTableRow {
+          scheduledTime
+          stationShortCode
+          stationUICCode
+        }
+      }
+      operatorShortCode
+      operatorUICCode
+      trainCategory
+      trainType
+      version
+    }
+  }
+}
+
+```
