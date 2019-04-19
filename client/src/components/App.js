@@ -7,27 +7,29 @@ import Search from './Search'
 import TabContainer from './TabContainer'
 import Table from './Table'
 
-class Post extends Component {
+export default class App extends Component {
+  state = { searchVal: 'HKI' }
+
+  handleSearch = searchVal => this.setState(() => ({ searchVal }))
+
   render() {
-    let title = this.props.post.title
-    if (this.props.isDraft) {
-      title = `${title} (Draft)`
+    const variables = {
+      station: this.state.searchVal,
     }
-
     return (
-      <div className='no-underline ma1' to={`/post/${this.props.post.id}`}>
-        <h2 className='f3 black-80 fw4 lh-solid'>{title}</h2>
-        <p className='black-80 fw3'>{this.props.post.content}</p>
-      </div>
-    )
-  }
-}
-
-export default class FeedPage extends Component {
-  render() {
-    return (
-      <Query query={FEED_QUERY} variables={{ station: 'HKI' }}>
+      <Query
+        query={STATION_QUERY}
+        variables={{ station: this.state.searchVal }}
+      >
         {({ data, loading, error, refetch }) => {
+          console.log(
+            'data, loading, error, refetch',
+            data,
+            loading,
+            error,
+            refetch,
+          )
+
           if (loading) {
             return (
               <div className='flex w-100 h-100 items-center justify-center pt7'>
@@ -37,6 +39,7 @@ export default class FeedPage extends Component {
           }
 
           if (error) {
+            console.log('error: ', error)
             return (
               <div className='flex w-100 h-100 items-center justify-center pt7'>
                 <div>An unexpected error occured.</div>
@@ -44,13 +47,16 @@ export default class FeedPage extends Component {
             )
           }
 
+          console.log('data: ', data)
+          const trains =
+            (data && data.viewer && data.viewer.getStationsTrainsUsingGET) || []
           return (
             <Fragment>
               <Header />
-              <Search />
+              <Search handleSearch={this.handleSearch.bind(this)} />
               <TabContainer>
-                <Table />
-                <Table />
+                <Table trains={trains} />
+                <Table trains={trains} />
               </TabContainer>
 
               {this.props.children}
@@ -62,21 +68,10 @@ export default class FeedPage extends Component {
   }
 }
 
-export const FEED_QUERY = gql`
-  query FeedQuery {
-    feed {
-      id
-      content
-      title
-      published
-    }
-  }
-`
-
 export const STATION_QUERY = gql`
   query StationQuery($station: String!) {
     viewer {
-      getStationsTrainsUsingGET(station: "HKI") {
+      getStationsTrainsUsingGET(station: $station) {
         cancelled
         commuterLineID
         departureDate

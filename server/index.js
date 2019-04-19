@@ -1,4 +1,6 @@
 import Express from 'express'
+import cors from 'cors'
+import morgan from 'morgan'
 import fetch from 'node-fetch'
 import bodyParser from 'body-parser'
 
@@ -10,7 +12,7 @@ import {
 } from 'graphql-tools'
 import { HttpLink } from 'apollo-link-http'
 
-const API_URL = 'https://rata.digitraffic.fi/api/v1/graphql/graphiql' // replace this url
+const API_URL = 'https://rata.digitraffic.fi/api/v1/graphql/graphiql'
 
 async function run() {
   const createRemoteSchema = async uri => {
@@ -29,6 +31,8 @@ async function run() {
 
   const app = new Express()
 
+  app.use(morgan('combined'))
+  app.use(cors())
   app.use(
     '/graphql',
     bodyParser.json(),
@@ -41,7 +45,7 @@ async function run() {
   console.log(
     'Server running. Open http://localhost:8080/graphiql to run queries.',
   )
-} // end of async run
+}
 
 try {
   run()

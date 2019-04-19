@@ -1,13 +1,10 @@
-import React from 'react'
+import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import { withStyles } from '@material-ui/core/styles'
 import Paper from '@material-ui/core/Paper'
 import InputBase from '@material-ui/core/InputBase'
-import Divider from '@material-ui/core/Divider'
 import IconButton from '@material-ui/core/IconButton'
-import MenuIcon from '@material-ui/icons/Menu'
 import SearchIcon from '@material-ui/icons/Search'
-import DirectionsIcon from '@material-ui/icons/Directions'
 
 const styles = {
   root: {
@@ -30,17 +27,32 @@ const styles = {
   },
 }
 
-function CustomizedInputBase(props) {
-  const { classes } = props
+class CustomizedInputBase extends Component {
+  state = { searchVal: 'null' }
 
-  return (
-    <Paper className={classes.root} elevation={1}>
-      <InputBase className={classes.input} placeholder='Hae aseman nimellä' />
-      <IconButton className={classes.iconButton} aria-label='Search'>
-        <SearchIcon />
-      </IconButton>
-    </Paper>
-  )
+  handleChange(event) {
+    this.setState({ searchVal: event.target.value })
+  }
+
+  render() {
+    const { handleSearch, classes } = this.props
+    return (
+      <Paper className={classes.root} elevation={1}>
+        <InputBase
+          className={classes.input}
+          placeholder='Hae aseman nimellä'
+          onChange={this.handleChange.bind(this)}
+        />
+        <IconButton
+          className={classes.iconButton}
+          aria-label='Search'
+          onClick={() => handleSearch(this.state.searchVal)}
+        >
+          <SearchIcon />
+        </IconButton>
+      </Paper>
+    )
+  }
 }
 
 CustomizedInputBase.propTypes = {

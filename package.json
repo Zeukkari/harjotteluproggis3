@@ -1,0 +1,13 @@
+{
+  "name": "harjotteluproggis3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "cd client && npm install && cd ../server && npm install",
+    "dev:client": "cd client && npm start",
+    "dev:server": "cd server && npm start"
+  },
+  "author": "Timo Aho",
+  "license": "MIT"
+}

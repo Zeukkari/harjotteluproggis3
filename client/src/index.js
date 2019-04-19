@@ -11,7 +11,7 @@ import 'tachyons'
 import './index.css'
 
 const link = createHttpLink({
-  uri: '/graphql',
+  uri: 'http://localhost:8080/graphql',
 })
 
 const client = new ApolloClient({
