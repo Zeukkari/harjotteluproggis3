@@ -10,8 +10,11 @@ import App from './components/App'
 import 'tachyons'
 import './index.css'
 
+const API_URL =
+  process.env.API_URL || 'https://rata.digitraffic.fi/api/v1/graphql/graphiql'
+
 const link = createHttpLink({
-  uri: 'http://localhost:8080/graphql',
+  uri: API_URL,
 })
 
 const client = new ApolloClient({

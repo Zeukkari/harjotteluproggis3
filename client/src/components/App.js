@@ -4,81 +4,198 @@ import gql from 'graphql-tag'
 
 import Header from './Header'
 import Search from './Search'
-import TabContainer from './TabContainer'
+import ScrollableTabsButtonAuto from './ScrollableTabsButtonAuto'
 import Table from './Table'
+import LinearBuffer from './LinearBuffer'
+
+const Placeholder = ({ children }) => (
+  <div>
+    <ScrollableTabsButtonAuto>
+      <Table trains={[]} stations={[]} currentStation={null} type='' />
+      <Table trains={[]} stations={[]} currentStation={null} type='' />
+    </ScrollableTabsButtonAuto>
+    {children}
+  </div>
+)
 
 export default class App extends Component {
-  state = { searchVal: 'HKI' }
+  constructor(props) {
+    super(props)
 
-  handleSearch = searchVal => this.setState(() => ({ searchVal }))
+    this.stations = []
+    this.state = { searchVal: '', currentStation: null }
+    this.handleSearch = this.handleSearch.bind(this)
+  }
+
+  state = { searchVal: '', currentStation: null }
+
+  handleSearch = station => {
+    this.setState(state => ({
+      currentStation: station.value,
+    }))
+  }
 
   render() {
-    const variables = {
-      station: this.state.searchVal,
-    }
     return (
-      <Query
-        query={STATION_QUERY}
-        variables={{ station: this.state.searchVal }}
-      >
-        {({ data, loading, error, refetch }) => {
-          console.log(
-            'data, loading, error, refetch',
-            data,
-            loading,
-            error,
-            refetch,
-          )
+      <Fragment>
+        <Header />
 
-          if (loading) {
-            return (
-              <div className='flex w-100 h-100 items-center justify-center pt7'>
-                <div>Loading ...</div>
-              </div>
-            )
-          }
+        <Query query={STATION_QUERY} pollInterval={30000}>
+          {({ data, loading, error, refetch }) => {
+            if (loading) {
+              return <Placeholder />
+            }
 
-          if (error) {
-            console.log('error: ', error)
-            return (
-              <div className='flex w-100 h-100 items-center justify-center pt7'>
-                <div>An unexpected error occured.</div>
-              </div>
-            )
-          }
+            if (data && data.viewer && data.viewer.stations !== undefined) {
+              const stations = data.viewer.stations
 
-          console.log('data: ', data)
-          const trains =
-            (data && data.viewer && data.viewer.getStationsTrainsUsingGET) || []
-          return (
-            <Fragment>
-              <Header />
-              <Search handleSearch={this.handleSearch.bind(this)} />
-              <TabContainer>
-                <Table trains={trains} />
-                <Table trains={trains} />
-              </TabContainer>
+              return (
+                <Fragment>
+                  <Search
+                    handleSearch={this.handleSearch.bind(this)}
+                    stations={stations}
+                  />
+                  <Query
+                    query={TRAIN_QUERY}
+                    skip={!this.state.currentStation}
+                    variables={{ station: this.state.currentStation }}
+                  >
+                    {({ data, loading, error, refetch }) => {
+                      if (loading) {
+                        return (
+                          <Placeholder>
+                            <LinearBuffer />
+                          </Placeholder>
+                        )
+                      }
 
-              {this.props.children}
-            </Fragment>
-          )
-        }}
-      </Query>
+                      if (error) {
+                        return (
+                          <Placeholder>
+                            <div className='flex w-100 h-100 items-center justify-center pt7'>
+                              <div>An unexpected error occured.</div>
+                            </div>
+                          </Placeholder>
+                        )
+                      }
+
+                      if (data == null) {
+                        return <Placeholder />
+                      }
+
+                      const arrivingTrains = data.viewer.arrivingTrains
+                      const departingTrains = data.viewer.departingTrains
+                      return (
+                        <ScrollableTabsButtonAuto>
+                          <Table
+                            trains={departingTrains}
+                            stations={stations}
+                            currentStation={this.state.currentStation}
+                            type='DEPARTURE'
+                          />
+                          <Table
+                            trains={arrivingTrains}
+                            stations={stations}
+                            currentStation={this.state.currentStation}
+                            type='ARRIVAL'
+                          />
+                        </ScrollableTabsButtonAuto>
+                      )
+                    }}
+                  </Query>
+                  }
+                </Fragment>
+              )
+            }
+          }}
+        </Query>
+      </Fragment>
     )
   }
 }
 
-export const STATION_QUERY = gql`
-  query StationQuery($station: String!) {
+export const TRAIN_QUERY = gql`
+  query TrainQuery($station: String!) {
     viewer {
-      getStationsTrainsUsingGET(station: $station) {
+      arrivingTrains: getStationsTrainsUsingGET(
+        station: $station
+        arrived_trains: 0
+        arriving_trains: 0
+        departed_trains: 1
+        departing_trains: 1
+      ) {
         cancelled
         commuterLineID
+        deleted
         departureDate
-        timetableAcceptanceDate
+        operatorShortCode
+        operatorUICCode
+        runningCurrently
         trainCategory
-        trainNumber
         trainType
+        trainNumber
+        timetableType
+        timeTableRows {
+          actualTime
+          cancelled
+          commercialStop
+          commercialTrack
+          countryCode
+          differenceInMinutes
+          estimateSource
+          liveEstimateTime
+          scheduledTime
+          stationShortCode
+          stationUICCode
+          trainStopping
+          type
+          unknownDelay
+        }
+      }
+      departingTrains: getStationsTrainsUsingGET(
+        station: $station
+        arrived_trains: 1
+        arriving_trains: 1
+        departed_trains: 0
+        departing_trains: 0
+      ) {
+        cancelled
+        commuterLineID
+        deleted
+        departureDate
+        operatorShortCode
+        operatorUICCode
+        runningCurrently
+        trainCategory
+        trainType
+        trainNumber
+        timetableType
+        timeTableRows {
+          actualTime
+          cancelled
+          commercialStop
+          commercialTrack
+          countryCode
+          differenceInMinutes
+          estimateSource
+          liveEstimateTime
+          scheduledTime
+          stationShortCode
+          stationUICCode
+          trainStopping
+          type
+          unknownDelay
+        }
+      }
+    }
+  }
+`
+export const STATION_QUERY = gql`
+  query StationQuery {
+    viewer {
+      stations: getStationsUsingGET(where: "[*passengerTraffic=true]") {
+        stationName
+        stationShortCode
       }
     }
   }

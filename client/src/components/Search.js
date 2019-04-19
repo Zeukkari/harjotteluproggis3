@@ -1,62 +1,128 @@
-import React, { Component } from 'react'
-import PropTypes from 'prop-types'
-import { withStyles } from '@material-ui/core/styles'
-import Paper from '@material-ui/core/Paper'
-import InputBase from '@material-ui/core/InputBase'
-import IconButton from '@material-ui/core/IconButton'
-import SearchIcon from '@material-ui/icons/Search'
+/* eslint-disable react/prop-types, react/jsx-handler-names */
 
-const styles = {
+import React from 'react'
+import PropTypes from 'prop-types'
+import Select from 'react-select'
+import { withStyles } from '@material-ui/core/styles'
+import TextField from '@material-ui/core/TextField'
+
+const styles = theme => ({
   root: {
     padding: '2px 4px',
-    display: 'flex',
+    display: 'block',
     alignItems: 'center',
     width: 400,
+    flexGrow: 1,
   },
   input: {
-    marginLeft: 8,
-    flex: 1,
+    padding: 8 * 3,
+    width: '300px',
   },
-  iconButton: {
-    padding: 10,
+  valueContainer: {},
+
+  noOptionsMessage: {
+    padding: `${theme.spacing.unit}px ${theme.spacing.unit * 2}px`,
   },
-  divider: {
-    width: 1,
-    height: 28,
-    margin: 4,
+  singleValue: {
+    fontSize: 16,
   },
+  placeholder: {
+    position: 'absolute',
+    left: 2,
+    fontSize: 16,
+  },
+})
+
+function inputComponent({ inputRef, ...props }) {
+  return <div ref={inputRef} {...props} />
 }
 
-class CustomizedInputBase extends Component {
-  state = { searchVal: 'null' }
+function Control(props) {
+  return (
+    <TextField
+      onChange={props.handleChange}
+      InputProps={{
+        inputComponent,
+        inputProps: {
+          className: props.selectProps.classes.input,
+          inputRef: props.innerRef,
+          children: props.children,
+          ...props.innerProps,
+        },
+      }}
+      {...props.selectProps.textFieldProps}
+    />
+  )
+}
 
-  handleChange(event) {
-    this.setState({ searchVal: event.target.value })
+const components = {
+  Control,
+}
+
+class IntegrationReactSelect extends React.Component {
+  constructor(props) {
+    super(props)
+
+    this.state = { inputVal: '', currentStation: null }
+    this.handleChange = this.handleChange.bind(this)
+    this.handleSelectOk = this.handleSelectOk.bind(this)
+  }
+  suggestions = []
+
+  handleChange(newVal) {
+    this.setState(state => ({ ...state, inputVal: newVal }))
+  }
+
+  handleSelectOk(suggestion) {
+    this.setState(state => ({
+      ...state,
+      inputVal: suggestion.label,
+      currentStation: suggestion.value,
+    }))
+    this.props.handleSearch(suggestion)
+  }
+
+  componentDidMount() {
+    const { stations } = this.props
+    this.suggestions = stations.map(station => ({
+      label: station.stationName,
+      value: station.stationShortCode,
+    }))
   }
 
   render() {
-    const { handleSearch, classes } = this.props
+    const { classes, theme } = this.props
+
+    const selectStyles = {
+      input: base => ({
+        ...base,
+        color: theme.palette.text.primary,
+        '& input': {
+          font: 'inherit',
+        },
+      }),
+    }
+
     return (
-      <Paper className={classes.root} elevation={1}>
-        <InputBase
-          className={classes.input}
-          placeholder='Hae aseman nimellä'
-          onChange={this.handleChange.bind(this)}
+      <div>
+        <Select
+          onInputChange={this.handleChange}
+          onChange={this.handleSelectOk}
+          classes={classes.input}
+          styles={selectStyles}
+          options={this.suggestions}
+          components={components}
+          placeholder='Hae asema'
+          isClearable
         />
-        <IconButton
-          className={classes.iconButton}
-          aria-label='Search'
-          onClick={() => handleSearch(this.state.searchVal)}
-        >
-          <SearchIcon />
-        </IconButton>
-      </Paper>
+      </div>
     )
   }
 }
 
-CustomizedInputBase.propTypes = {
+IntegrationReactSelect.propTypes = {
   classes: PropTypes.object.isRequired,
+  theme: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(CustomizedInputBase)
+export default withStyles(styles, { withTheme: true })(IntegrationReactSelect)

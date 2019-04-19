@@ -9,5 +9,6 @@
     "dev:server": "cd server && npm start"
   },
   "author": "Timo Aho",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {}
 }
