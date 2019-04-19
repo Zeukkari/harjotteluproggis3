@@ -152,3 +152,27 @@ https://blog.hashvel.com/posts/learn-graphql-query-alias-fragments-variables-dir
 }
 ```
 
+```
+    viewer {
+      trains: getStationsTrainsUsingGET(station: $station) {
+        cancelled
+        commuterLineID
+        departureDate
+        timeTableRows {
+          scheduledTime
+          actualTime
+          cancelled
+          liveEstimateTime
+        }
+        timetableAcceptanceDate
+        trainCategory
+        trainNumber
+        trainType
+      }
+
+      stations: getStationsUsingGET {
+        stationName
+        stationShortCode
+      }
+    }
+```
