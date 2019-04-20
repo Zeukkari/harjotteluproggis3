@@ -1,4 +1,4 @@
-# Rataopas
+# Rataopas ![Build Status](https://travis-ci.com/Zeukkari/rataopas.svg?branch=master)
 
 [https://rataopas.surge.sh/](https://rataopas.surge.sh/)
 
