@@ -1,4 +1,11 @@
-# GraphQL-treenausta
+# Rataopas
+
+Rataoppaasta näet kätevästi viimeisimmät junat joista myöhästyit.
+
+(https://raw.githubusercontent.com/Zeukkari/harjotteluproggis3/master/rataopas.png)[https://raw.githubusercontent.com/Zeukkari/harjotteluproggis3/master/rataopas.png]
+
+
+### Projektin taustalla GraphQL-treenausta
 
 https://devhints.io/graphql
 
@@ -13,7 +20,7 @@ https://graphql.github.io/learn/queries/
 https://blog.hashvel.com/posts/learn-graphql-query-alias-fragments-variables-directives-with-examples/
 
 
-## Testiqueryjä
+### Testiqueryjä
 
 ```
 {
