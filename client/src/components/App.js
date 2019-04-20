@@ -4,6 +4,8 @@ import gql from 'graphql-tag'
 
 import Header from './Header'
 import Search from './Search'
+import Autosuggest from './AutosuggestInput'
+import AutocompleteInput from './AutocompleteInput'
 import ScrollableTabsButtonAuto from './ScrollableTabsButtonAuto'
 import Table from './Table'
 import LinearBuffer from './LinearBuffer'
@@ -23,13 +25,15 @@ export default class App extends Component {
     super(props)
 
     this.stations = []
-    this.state = { searchVal: '', currentStation: null }
+    this.state = {
+      searchVal: '',
+      currentStation: null,
+    }
     this.handleSearch = this.handleSearch.bind(this)
   }
 
-  state = { searchVal: '', currentStation: null }
-
   handleSearch = station => {
+    console.log('handleSearch', station, this.state)
     this.setState(state => ({
       currentStation: station.value,
     }))
@@ -37,7 +41,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Fragment>
+      <div>
         <Header />
 
         <Query query={STATION_QUERY} pollInterval={30000}>
@@ -48,12 +52,26 @@ export default class App extends Component {
 
             if (data && data.viewer && data.viewer.stations !== undefined) {
               const stations = data.viewer.stations
+              const suggestions = stations.map(item => ({
+                label: item.stationName,
+                value: item.stationShortCode,
+              }))
 
               return (
                 <Fragment>
+                  {/**
                   <Search
                     handleSearch={this.handleSearch.bind(this)}
                     stations={stations}
+                  />
+                  <Autosuggest
+                    handleSearch={this.handleSearch.bind(this)}
+                    suggestions={suggestions}
+                  />
+                  */}
+                  <AutocompleteInput
+                    handleSearch={this.handleSearch.bind(this)}
+                    suggestions={suggestions}
                   />
                   <Query
                     query={TRAIN_QUERY}
@@ -109,7 +127,7 @@ export default class App extends Component {
             }
           }}
         </Query>
-      </Fragment>
+      </div>
     )
   }
 }

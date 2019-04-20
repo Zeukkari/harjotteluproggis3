@@ -6,7 +6,7 @@ import TableRow from '@material-ui/core/TableRow'
 class EnhancedTableHead extends React.Component {
   render() {
     const { type } = this.props
-    const dateLabel = type === 'ARRIVING' ? 'saapuvat' : 'lähtevät'
+    const dateLabel = type === 'ARRIVING' ? 'Saapuvat' : 'Lähtevät'
     const rows = [
       { id: 'train', numeric: false, label: 'Juna' },
       {

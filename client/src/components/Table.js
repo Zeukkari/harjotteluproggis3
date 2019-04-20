@@ -6,6 +6,7 @@ import TableBody from '@material-ui/core/TableBody'
 import TableCell from '@material-ui/core/TableCell'
 import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
+import moment from 'moment'
 import EnhancedTableHead from './TableHead'
 
 const styles = theme => ({
@@ -57,7 +58,9 @@ class EnhancedTable extends React.Component {
                   )
                 })
                 const timeField =
-                  timeInfo.actualTime || timeInfo.scheduledTime || 'missing'
+                  timeInfo.actualTime || timeInfo.scheduledTime || null
+
+                const formattedTime = moment(timeField).fromNow()
                 return (
                   <TableRow
                     hover
@@ -68,7 +71,7 @@ class EnhancedTable extends React.Component {
                     <TableCell align='center'>{trainLabel}</TableCell>
                     <TableCell align='center'>{startStation} </TableCell>
                     <TableCell align='center'> {endStation} </TableCell>
-                    <TableCell align='center'>{timeField} </TableCell>
+                    <TableCell align='center'>{formattedTime} </TableCell>
                   </TableRow>
                 )
               })}

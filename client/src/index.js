@@ -7,9 +7,6 @@ import { InMemoryCache } from 'apollo-cache-inmemory'
 
 import App from './components/App'
 
-import 'tachyons'
-import './index.css'
-
 const API_URL =
   process.env.API_URL || 'https://rata.digitraffic.fi/api/v1/graphql/graphiql'
 
