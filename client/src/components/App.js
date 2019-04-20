@@ -2,13 +2,11 @@ import React, { Component, Fragment } from 'react'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
 
-import Header from './Header'
-import Search from './Search'
-import Autosuggest from './AutosuggestInput'
 import AutocompleteInput from './AutocompleteInput'
 import ScrollableTabsButtonAuto from './ScrollableTabsButtonAuto'
 import Table from './Table'
 import LinearBuffer from './LinearBuffer'
+import Layout from './Layout'
 
 const Placeholder = ({ children }) => (
   <div>
@@ -19,6 +17,39 @@ const Placeholder = ({ children }) => (
     {children}
   </div>
 )
+
+function mapStation(stations, stationCode) {
+  if (stations.find === undefined) return 'stations were missing'
+  const lookUp = stations.find(item => item.stationShortCode === stationCode)
+  if (lookUp) return lookUp.stationName
+  else return 'station missing'
+}
+
+function processQueryResultItem(result, currentStation, stations) {
+  const timeTable = result.timeTableRows
+  const startStation = mapStation(stations, timeTable[0].stationShortCode)
+  const endStation = mapStation(stations, timeTable[0].stationShortCode)
+  const currentStationTimeTable = timeTable.filter(item => {
+    return item.stationShortCode === currentStation
+  })
+  const arrivalTime = currentStationTimeTable.find(
+    item => item.type === 'ARRIVAL',
+  )
+  const departureTime = currentStationTimeTable.find(
+    item => item.type === 'DEPARTURE',
+  )
+
+  return {
+    cancelled: result.cancelled,
+    commuterLineID: result.commuterLineID,
+    trainNumber: result.trainNumber,
+    startStation: startStation,
+    endStation: endStation,
+    arrivalTime: arrivalTime,
+    departureTime: departureTime,
+    currentStationTimeTable: currentStationTimeTable,
+  }
+}
 
 export default class App extends Component {
   constructor(props) {
@@ -33,7 +64,6 @@ export default class App extends Component {
   }
 
   handleSearch = station => {
-    console.log('handleSearch', station, this.state)
     this.setState(state => ({
       currentStation: station.value,
     }))
@@ -41,9 +71,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <div>
-        <Header />
-
+      <Layout>
         <Query query={STATION_QUERY} pollInterval={30000}>
           {({ data, loading, error, refetch }) => {
             if (loading) {
@@ -80,6 +108,9 @@ export default class App extends Component {
                   >
                     {({ data, loading, error, refetch }) => {
                       if (loading) {
+                        return <Placeholder />
+                      }
+                      if (loading) {
                         return (
                           <Placeholder>
                             <LinearBuffer />
@@ -100,20 +131,28 @@ export default class App extends Component {
                       if (data == null) {
                         return <Placeholder />
                       }
-
-                      const arrivingTrains = data.viewer.arrivingTrains
-                      const departingTrains = data.viewer.departingTrains
+                      const trains = data.data.arrivingTrains.map(item =>
+                        processQueryResultItem(
+                          item,
+                          this.state.currentStation,
+                          stations,
+                        ),
+                      )
+                      const arrivingTrains = trains.filter(
+                        train => train.arrivalTime !== undefined,
+                      )
+                      const departingTrains = trains.filter(
+                        train => train.departureTime !== undefined,
+                      )
                       return (
                         <ScrollableTabsButtonAuto>
                           <Table
                             trains={departingTrains}
-                            stations={stations}
                             currentStation={this.state.currentStation}
                             type='DEPARTURE'
                           />
                           <Table
                             trains={arrivingTrains}
-                            stations={stations}
                             currentStation={this.state.currentStation}
                             type='ARRIVAL'
                           />
@@ -121,90 +160,39 @@ export default class App extends Component {
                       )
                     }}
                   </Query>
-                  }
                 </Fragment>
               )
             }
           }}
         </Query>
-      </div>
+      </Layout>
     )
   }
 }
 
 export const TRAIN_QUERY = gql`
-  query TrainQuery($station: String!) {
-    viewer {
-      arrivingTrains: getStationsTrainsUsingGET(
-        station: $station
-        arrived_trains: 0
-        arriving_trains: 0
-        departed_trains: 1
-        departing_trains: 1
-      ) {
-        cancelled
-        commuterLineID
-        deleted
-        departureDate
-        operatorShortCode
-        operatorUICCode
-        runningCurrently
-        trainCategory
-        trainType
-        trainNumber
-        timetableType
-        timeTableRows {
-          actualTime
-          cancelled
-          commercialStop
-          commercialTrack
-          countryCode
-          differenceInMinutes
-          estimateSource
-          liveEstimateTime
-          scheduledTime
-          stationShortCode
-          stationUICCode
-          trainStopping
-          type
-          unknownDelay
-        }
+  query TrainQuery($station: String = "HKI") {
+    data: viewer {
+      arrivingTrains: getStationsTrainsUsingGET(station: $station) {
+        ...TrainInfo
       }
-      departingTrains: getStationsTrainsUsingGET(
-        station: $station
-        arrived_trains: 1
-        arriving_trains: 1
-        departed_trains: 0
-        departing_trains: 0
-      ) {
-        cancelled
-        commuterLineID
-        deleted
-        departureDate
-        operatorShortCode
-        operatorUICCode
-        runningCurrently
-        trainCategory
-        trainType
-        trainNumber
-        timetableType
-        timeTableRows {
-          actualTime
-          cancelled
-          commercialStop
-          commercialTrack
-          countryCode
-          differenceInMinutes
-          estimateSource
-          liveEstimateTime
-          scheduledTime
-          stationShortCode
-          stationUICCode
-          trainStopping
-          type
-          unknownDelay
-        }
+      departingTrains: getStationsTrainsUsingGET(station: $station) {
+        ...TrainInfo
       }
+    }
+  }
+
+  fragment TrainInfo on getStationsTrainsUsingGET_items {
+    cancelled
+    commuterLineID
+    trainNumber
+    timeTableRows {
+      actualTime
+      cancelled
+      liveEstimateTime
+      scheduledTime
+      stationShortCode
+      type
     }
   }
 `

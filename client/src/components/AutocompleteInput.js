@@ -16,9 +16,7 @@ import { emphasize } from '@material-ui/core/styles/colorManipulator'
 
 const styles = theme => ({
   root: {
-    display: 'inline',
-    flexGrow: 1,
-    height: 250,
+    position: 'relative',
   },
   input: {
     display: 'flex',

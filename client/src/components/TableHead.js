@@ -1,12 +1,12 @@
 import React from 'react'
-import TableCell from '@material-ui/core/TableCell'
 import TableHead from '@material-ui/core/TableHead'
 import TableRow from '@material-ui/core/TableRow'
+import { CustomTableCell } from './Table'
 
 class EnhancedTableHead extends React.Component {
   render() {
     const { type } = this.props
-    const dateLabel = type === 'ARRIVING' ? 'Saapuvat' : 'Lähtevät'
+    const dateLabel = type
     const rows = [
       { id: 'train', numeric: false, label: 'Juna' },
       {
@@ -31,9 +31,9 @@ class EnhancedTableHead extends React.Component {
         <TableRow>
           {rows.map(
             row => (
-              <TableCell key={row.id} align='center'>
+              <CustomTableCell key={row.id} align='center'>
                 {row.label}
-              </TableCell>
+              </CustomTableCell>
             ),
             this,
           )}

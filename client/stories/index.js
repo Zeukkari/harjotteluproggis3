@@ -5,6 +5,8 @@ import AutocompleteInput from '../src/components/AutocompleteInput'
 import Autosuggest from '../src/components/AutosuggestInput'
 import CustomTable from '../src/components/CustomTable'
 import TextFields from '../src/components/TextFields'
+import Album from '../src/components/Album'
+import Layout from '../src/components/Layout'
 
 const suggestions = [
   { label: 'Afghanistan' },
@@ -57,17 +59,13 @@ storiesOf('Button', module)
   ))
 
 storiesOf('Autocomplete', module)
-  .add('default', () => <div>foo</div>)
-  .add('Second', () => <AutocompleteInput suggestions={suggestions} />)
+  .add('Autosuggest', () => <Autosuggest suggestions={suggestions} />)
+  .add('Autocomplete', () => <AutocompleteInput suggestions={suggestions} />)
 
-storiesOf('Autosuggest', module)
-  .add('default', () => <div>foo</div>)
-  .add('Second', () => <Autosuggest suggestions={suggestions} />)
+storiesOf('Misc', module)
+  .add('Text Fields', () => <TextFields />)
+  .add('Custom Table', () => <CustomTable />)
 
-storiesOf('Custom Table', module)
-  .add('default', () => <div>foo</div>)
-  .add('Second', () => <CustomTable />)
-
-storiesOf('Filled Text Fields', module)
-  .add('default', () => <div>foo</div>)
-  .add('Second', () => <TextFields />)
+storiesOf('Layout', module)
+  .add('default', () => <Album />)
+  .add('Second', () => <Layout />)

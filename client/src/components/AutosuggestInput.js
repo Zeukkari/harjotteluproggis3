@@ -135,7 +135,7 @@ class IntegrationAutosuggest extends React.Component {
   }
 
   render() {
-    const { classes, suggestions } = this.props
+    const { classes } = this.props
 
     const autosuggestProps = {
       renderInputComponent,

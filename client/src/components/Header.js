@@ -6,8 +6,8 @@ import Toolbar from '@material-ui/core/Toolbar'
 import Typography from '@material-ui/core/Typography'
 
 const styles = {
-  root: {
-    flexGrow: 1,
+  appBar: {
+    position: 'relative',
   },
 }
 
@@ -15,15 +15,13 @@ function SimpleAppBar(props) {
   const { classes } = props
 
   return (
-    <div className={classes.root}>
-      <AppBar position='static' color='default'>
-        <Toolbar>
-          <Typography variant='h6' color='inherit'>
-            Aseman junatiedot
-          </Typography>
-        </Toolbar>
-      </AppBar>
-    </div>
+    <AppBar position='static' className={classes.appBar}>
+      <Toolbar>
+        <Typography variant='h6' color='inherit'>
+          Aseman junatiedot
+        </Typography>
+      </Toolbar>
+    </AppBar>
   )
 }
 
