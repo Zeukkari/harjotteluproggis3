@@ -181,7 +181,7 @@ const components = {
   ValueContainer,
 }
 
-class IntegrationReactSelect extends React.Component {
+class Search extends React.Component {
   constructor(props) {
     super(props)
     this.state = {
@@ -191,19 +191,25 @@ class IntegrationReactSelect extends React.Component {
       inputVal: '',
       suggestions: props.suggestions,
     }
+    this.onInputChange = this.onInputChange.bind(this)
     this.handleChange = this.handleChange.bind(this)
     this.handleSelectOk = this.handleSelectOk.bind(this)
   }
 
   handleChange = name => value => {
-    this.setState({
+    this.setState(state => ({
+      ...state,
       [name]: value,
-    })
+    }))
   }
 
   handleSelectOk(suggestion) {
-    console.log('handleSelectOk', suggestion, this.state)
     this.props.handleSearch(suggestion)
+    this.setState({ single: suggestion })
+  }
+
+  onInputChange(value) {
+    this.setState(state => ({ ...state, inputVal: value }))
   }
 
   render() {
@@ -239,9 +245,9 @@ class IntegrationReactSelect extends React.Component {
   }
 }
 
-IntegrationReactSelect.propTypes = {
+Search.propTypes = {
   classes: PropTypes.object.isRequired,
   theme: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles, { withTheme: true })(IntegrationReactSelect)
+export default withStyles(styles, { withTheme: true })(Search)

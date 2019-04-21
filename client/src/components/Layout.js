@@ -52,7 +52,7 @@ const styles = theme => ({
   },
 })
 
-function Album(props) {
+function Layout(props) {
   const { classes, children } = props
 
   return (
@@ -67,16 +67,13 @@ function Album(props) {
       </main>
       {/* Footer */}
       <footer className={classes.footer}>
-        <Typography variant='h6' align='center' gutterBottom>
-          Footer
-        </Typography>
         <Typography
           variant='subtitle1'
           align='center'
           color='textSecondary'
           component='p'
         >
-          Something here to give the footer a purpose!
+          harjotteluprojekti
         </Typography>
       </footer>
       {/* End footer */}
@@ -84,8 +81,8 @@ function Album(props) {
   )
 }
 
-Album.propTypes = {
+Layout.propTypes = {
   classes: PropTypes.object.isRequired,
 }
 
-export default withStyles(styles)(Album)
+export default withStyles(styles)(Layout)

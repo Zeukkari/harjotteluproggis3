@@ -1,20 +1,21 @@
 import React, { Component, Fragment } from 'react'
 import { Query } from 'react-apollo'
 import gql from 'graphql-tag'
+import moment from 'moment'
 
 import AutocompleteInput from './AutocompleteInput'
 import ScrollableTabsButtonAuto from './ScrollableTabsButtonAuto'
-import Table from './Table'
+import Table from './EnhancedTable'
 import LinearBuffer from './LinearBuffer'
 import Layout from './Layout'
 
 const Placeholder = ({ children }) => (
   <div>
     <ScrollableTabsButtonAuto>
+      {children}
       <Table trains={[]} stations={[]} currentStation={null} type='' />
       <Table trains={[]} stations={[]} currentStation={null} type='' />
     </ScrollableTabsButtonAuto>
-    {children}
   </div>
 )
 
@@ -22,10 +23,10 @@ function mapStation(stations, stationCode) {
   if (stations.find === undefined) return 'stations were missing'
   const lookUp = stations.find(item => item.stationShortCode === stationCode)
   if (lookUp) return lookUp.stationName
-  else return 'station missing'
+  else return ''
 }
 
-function processQueryResultItem(result, currentStation, stations) {
+function processQueryResultItem(result, currentStation, stations, type) {
   const timeTable = result.timeTableRows
   const startStation = mapStation(stations, timeTable[0].stationShortCode)
   const endStation = mapStation(stations, timeTable[0].stationShortCode)
@@ -39,15 +40,39 @@ function processQueryResultItem(result, currentStation, stations) {
     item => item.type === 'DEPARTURE',
   )
 
+  let formattedArrivalTime = ''
+  if (arrivalTime) {
+    formattedArrivalTime =
+      arrivalTime.liveEstimateTime ||
+      arrivalTime.actualTime ||
+      arrivalTime.scheduledTime
+  }
+
+  let formattedDepartureTime = ''
+  if (departureTime) {
+    formattedDepartureTime =
+      departureTime.liveEstimateTime ||
+      departureTime.actualTime ||
+      departureTime.scheduledTime
+  }
+  formattedDepartureTime = moment(formattedDepartureTime).format('hh:mm:ss')
+  formattedArrivalTime = moment(formattedArrivalTime).format('hh:mm:ss')
+
+  const sortTime =
+    type === 'ARRIVAL' ? formattedArrivalTime : formattedDepartureTime
+
   return {
     cancelled: result.cancelled,
     commuterLineID: result.commuterLineID,
     trainNumber: result.trainNumber,
     startStation: startStation,
     endStation: endStation,
-    arrivalTime: arrivalTime,
-    departureTime: departureTime,
+    arrivalTime: formattedArrivalTime,
+    departureTime: formattedDepartureTime,
+    arrivalTimeDetails: arrivalTime,
+    departureTimeDetails: departureTime,
     currentStationTimeTable: currentStationTimeTable,
+    sortTime: sortTime,
   }
 }
 
@@ -75,9 +100,12 @@ export default class App extends Component {
         <Query query={STATION_QUERY} pollInterval={30000}>
           {({ data, loading, error, refetch }) => {
             if (loading) {
-              return <Placeholder />
+              return (
+                <Placeholder>
+                  <LinearBuffer />
+                </Placeholder>
+              )
             }
-
             if (data && data.viewer && data.viewer.stations !== undefined) {
               const stations = data.viewer.stations
               const suggestions = stations.map(item => ({
@@ -98,7 +126,7 @@ export default class App extends Component {
                   />
                   */}
                   <AutocompleteInput
-                    handleSearch={this.handleSearch.bind(this)}
+                    handleSearch={this.handleSearch}
                     suggestions={suggestions}
                   />
                   <Query
@@ -107,9 +135,6 @@ export default class App extends Component {
                     variables={{ station: this.state.currentStation }}
                   >
                     {({ data, loading, error, refetch }) => {
-                      if (loading) {
-                        return <Placeholder />
-                      }
                       if (loading) {
                         return (
                           <Placeholder>
@@ -121,29 +146,56 @@ export default class App extends Component {
                       if (error) {
                         return (
                           <Placeholder>
-                            <div className='flex w-100 h-100 items-center justify-center pt7'>
-                              <div>An unexpected error occured.</div>
-                            </div>
+                            <div>An unexpected error occured.</div>
+                            <LinearBuffer />
                           </Placeholder>
                         )
                       }
-
                       if (data == null) {
-                        return <Placeholder />
+                        return (
+                          <ScrollableTabsButtonAuto>
+                            <Table
+                              trains={[]}
+                              currentStation={this.state.currentStation}
+                              type='DEPARTURE'
+                            />
+                            <Table
+                              trains={[]}
+                              currentStation={this.state.currentStation}
+                              type='ARRIVAL'
+                            />
+                          </ScrollableTabsButtonAuto>
+                        )
                       }
-                      const trains = data.data.arrivingTrains.map(item =>
+
+                      let arrivingTrains = data.data.arrivingTrains.map(item =>
                         processQueryResultItem(
                           item,
                           this.state.currentStation,
                           stations,
+                          'ARRIVAL',
                         ),
                       )
-                      const arrivingTrains = trains.filter(
+                      arrivingTrains = arrivingTrains.filter(
                         train => train.arrivalTime !== undefined,
                       )
-                      const departingTrains = trains.filter(
+
+                      let departingTrains = data.data.departingTrains.map(
+                        item =>
+                          processQueryResultItem(
+                            item,
+                            this.state.currentStation,
+                            stations,
+                            'DEPARTURE',
+                          ),
+                      )
+                      departingTrains = departingTrains.filter(
                         train => train.departureTime !== undefined,
                       )
+                      departingTrains = departingTrains.filter(
+                        train => train.arrivalTime !== undefined,
+                      )
+
                       return (
                         <ScrollableTabsButtonAuto>
                           <Table
