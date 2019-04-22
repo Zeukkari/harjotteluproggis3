@@ -28,11 +28,16 @@ function mapStation(stations, stationCode) {
 
 function processQueryResultItem(result, currentStation, stations, type) {
   const timeTable = result.timeTableRows
-  const startStation = mapStation(stations, timeTable[0].stationShortCode)
-  const endStation = mapStation(stations, timeTable[0].stationShortCode)
+  const startStation =
+    mapStation(stations, timeTable[0].stationShortCode) ||
+    timeTable[0].stationShortCode
+  const endStation =
+    mapStation(stations, timeTable[timeTable.length - 1].stationShortCode) ||
+    timeTable[timeTable.length - 1].stationShortCode
   const currentStationTimeTable = timeTable.filter(item => {
     return item.stationShortCode === currentStation
   })
+
   const arrivalTime = currentStationTimeTable.find(
     item => item.type === 'ARRIVAL',
   )
@@ -41,22 +46,33 @@ function processQueryResultItem(result, currentStation, stations, type) {
   )
 
   let formattedArrivalTime = ''
+
   if (arrivalTime) {
-    formattedArrivalTime =
-      arrivalTime.liveEstimateTime ||
-      arrivalTime.actualTime ||
-      arrivalTime.scheduledTime
+    const isLive = arrivalTime.liveEstimateTime != null
+    if (isLive) {
+      const time1 = moment(arrivalTime.liveEstimateTime).format('HH:mm:ss')
+      const time2 = moment(arrivalTime.scheduledTime).format('HH:mm:ss')
+      formattedArrivalTime = `${time1}\n (${time2})`
+    } else {
+      formattedArrivalTime = moment(arrivalTime.scheduledTime).format(
+        'HH:mm:ss',
+      )
+    }
   }
 
   let formattedDepartureTime = ''
   if (departureTime) {
-    formattedDepartureTime =
-      departureTime.liveEstimateTime ||
-      departureTime.actualTime ||
-      departureTime.scheduledTime
+    const isLive = departureTime.liveEstimateTime != null
+    if (isLive) {
+      const time1 = moment(departureTime.liveEstimateTime).format('HH:mm:ss')
+      const time2 = moment(departureTime.scheduledTime).format('HH:mm:ss')
+      formattedDepartureTime = `${time1} (${time2})`
+    } else {
+      formattedDepartureTime = moment(departureTime.scheduledTime).format(
+        'HH:mm:ss',
+      )
+    }
   }
-  formattedDepartureTime = moment(formattedDepartureTime).format('hh:mm:ss')
-  formattedArrivalTime = moment(formattedArrivalTime).format('hh:mm:ss')
 
   const sortTime =
     type === 'ARRIVAL' ? formattedArrivalTime : formattedDepartureTime
@@ -65,6 +81,7 @@ function processQueryResultItem(result, currentStation, stations, type) {
     cancelled: result.cancelled,
     commuterLineID: result.commuterLineID,
     trainNumber: result.trainNumber,
+    trainType: result.trainType,
     startStation: startStation,
     endStation: endStation,
     arrivalTime: formattedArrivalTime,
@@ -89,16 +106,18 @@ export default class App extends Component {
   }
 
   handleSearch = station => {
-    this.setState(state => ({
-      currentStation: station.value,
-    }))
+    if (station) {
+      this.setState(state => ({
+        currentStation: station.value,
+      }))
+    }
   }
 
   render() {
     return (
       <Layout>
-        <Query query={STATION_QUERY} pollInterval={30000}>
-          {({ data, loading, error, refetch }) => {
+        <Query query={STATION_QUERY}>
+          {({ data, loading, error, refetch, stopPolling }) => {
             if (loading) {
               return (
                 <Placeholder>
@@ -112,19 +131,10 @@ export default class App extends Component {
                 label: item.stationName,
                 value: item.stationShortCode,
               }))
+              stopPolling()
 
               return (
                 <Fragment>
-                  {/**
-                  <Search
-                    handleSearch={this.handleSearch.bind(this)}
-                    stations={stations}
-                  />
-                  <Autosuggest
-                    handleSearch={this.handleSearch.bind(this)}
-                    suggestions={suggestions}
-                  />
-                  */}
                   <AutocompleteInput
                     handleSearch={this.handleSearch}
                     suggestions={suggestions}
@@ -176,9 +186,13 @@ export default class App extends Component {
                           'ARRIVAL',
                         ),
                       )
-                      arrivingTrains = arrivingTrains.filter(
-                        train => train.arrivalTime !== undefined,
-                      )
+                      arrivingTrains = arrivingTrains.filter(train => {
+                        const arrivalTimeDetails = train.arrivalTimeDetails
+                        return (
+                          train.arrivalTimeDetails !== undefined &&
+                          arrivalTimeDetails.actualTime == null
+                        )
+                      })
 
                       let departingTrains = data.data.departingTrains.map(
                         item =>
@@ -189,12 +203,13 @@ export default class App extends Component {
                             'DEPARTURE',
                           ),
                       )
-                      departingTrains = departingTrains.filter(
-                        train => train.departureTime !== undefined,
-                      )
-                      departingTrains = departingTrains.filter(
-                        train => train.arrivalTime !== undefined,
-                      )
+                      departingTrains = departingTrains.filter(train => {
+                        const departureTimeDetails = train.departureTimeDetails
+                        return (
+                          train.departureTimeDetails !== undefined &&
+                          departureTimeDetails.actualTime == null
+                        )
+                      })
 
                       return (
                         <ScrollableTabsButtonAuto>
@@ -225,10 +240,22 @@ export default class App extends Component {
 export const TRAIN_QUERY = gql`
   query TrainQuery($station: String = "HKI") {
     data: viewer {
-      arrivingTrains: getStationsTrainsUsingGET(station: $station) {
+      departingTrains: getStationsTrainsUsingGET(
+        station: $station
+        minutes_before_departure: 60
+        minutes_before_arrival: 60
+        minutes_after_arrival: 60
+        minutes_after_departure: 60
+      ) {
         ...TrainInfo
       }
-      departingTrains: getStationsTrainsUsingGET(station: $station) {
+      arrivingTrains: getStationsTrainsUsingGET(
+        station: $station
+        minutes_before_departure: 60
+        minutes_before_arrival: 60
+        minutes_after_arrival: 60
+        minutes_after_departure: 60
+      ) {
         ...TrainInfo
       }
     }
@@ -238,6 +265,7 @@ export const TRAIN_QUERY = gql`
     cancelled
     commuterLineID
     trainNumber
+    trainType
     timeTableRows {
       actualTime
       cancelled

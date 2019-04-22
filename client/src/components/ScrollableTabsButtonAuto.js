@@ -34,7 +34,7 @@ class ScrollableTabsButtonAuto extends React.Component {
             value={value}
             onChange={this.handleChange}
             indicatorColor='primary'
-            textColor='primary'
+            textColor='inherit'
             variant='scrollable'
             scrollButtons='auto'
           >

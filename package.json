@@ -1,7 +1,7 @@
 {
-  "name": "harjotteluproggis3",
+  "name": "rataopas",
   "version": "1.0.0",
-  "description": "",
+  "description": "Digitraffic show arriving and departing trains per station.",
   "main": "index.js",
   "scripts": {
     "postinstall": "cd client && npm install && cd ../server && npm install",
@@ -10,6 +10,5 @@
     "build": "cd client && npm run build"
   },
   "author": "Timo Aho",
-  "license": "MIT",
-  "dependencies": {}
+  "license": "MIT"
 }

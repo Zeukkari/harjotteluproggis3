@@ -52,7 +52,7 @@ class EnhancedTableHead extends React.Component {
   render() {
     const { order, orderBy, type } = this.props
 
-    const typeLabel = type === 'DEPARTURE' ? 'Lähdöt' : 'Saapuvat'
+    const typeLabel = type === 'DEPARTURE' ? 'Lähtee' : 'Saapuu'
 
     const rows = [
       {
@@ -197,7 +197,7 @@ const styles = theme => ({
     overflowX: 'auto',
   },
   table: {
-    minWidth: 1020,
+    minWidth: 240,
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -215,7 +215,7 @@ class EnhancedTable extends React.Component {
 
     this.state = {
       order: 'asc',
-      orderBy: 'time',
+      orderBy: 'sortTime',
       selected: [],
       trains: props.trains,
       page: 0,
@@ -302,14 +302,24 @@ class EnhancedTable extends React.Component {
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map(train => {
                   const isSelected = this.isSelected(train.trainNumber)
-                  const trainLabel =
-                    train.commuterLineID || `${train.trainNumber}`
+                  let trainLabel
+                  if (train.commuterLineID) {
+                    trainLabel = `Commuter ${train.commuterLineID}`
+                  } else {
+                    trainLabel = `${train.trainType} ${train.trainNumber}`
+                  }
 
                   const startStation = train.startStation
                   const endStation = train.endStation
 
-                  const timeLabel =
-                    type === 'ARRIVAL' ? train.arrivalTime : train.departureTime
+                  let timeLabel
+                  if (type === 'ARRIVAL') {
+                    timeLabel = train.arrivalTime
+                  } else {
+                    timeLabel = train.departureTime
+                  }
+
+                  let rowColor = train.cancelled ? 'error' : 'textPrimary'
 
                   return (
                     <TableRow
@@ -322,6 +332,7 @@ class EnhancedTable extends React.Component {
                       tabIndex={-1}
                       key={`${train.trainNumber}-${Math.random()}`}
                       selected={isSelected}
+                      className={classes.row}
                     >
                       <TableCell padding='checkbox' />
                       <TableCell
@@ -339,7 +350,7 @@ class EnhancedTable extends React.Component {
                         <Typography>{endStation}</Typography>
                       </TableCell>
                       <TableCell align='right'>
-                        <Typography>{timeLabel}</Typography>
+                        <Typography color={rowColor}>{timeLabel}</Typography>
                       </TableCell>
                     </TableRow>
                   )

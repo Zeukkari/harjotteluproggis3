@@ -224,6 +224,7 @@ class Search extends React.Component {
         },
       }),
     }
+
     // this.handleChange('single')
     return (
       <div className={classes.root}>
