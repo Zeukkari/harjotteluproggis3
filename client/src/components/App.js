@@ -8,6 +8,7 @@ import ScrollableTabsButtonAuto from './ScrollableTabsButtonAuto'
 import Table from './EnhancedTable'
 import LinearBuffer from './LinearBuffer'
 import Layout from './Layout'
+import GridLayout from './GridLayout'
 
 const Placeholder = ({ children }) => (
   <div>
@@ -115,7 +116,7 @@ export default class App extends Component {
 
   render() {
     return (
-      <Layout>
+      <GridLayout>
         <Query query={STATION_QUERY}>
           {({ data, loading, error, refetch, stopPolling }) => {
             if (loading) {
@@ -232,7 +233,7 @@ export default class App extends Component {
             }
           }}
         </Query>
-      </Layout>
+      </GridLayout>
     )
   }
 }

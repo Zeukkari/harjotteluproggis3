@@ -9,25 +9,28 @@ import TableRow from '@material-ui/core/TableRow'
 import Paper from '@material-ui/core/Paper'
 
 const CustomTableCell = withStyles(theme => ({
+  root: {
+    typography: {
+      fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif"',
+      fontSize: '0.05rem',
+      fontWeightLight: 300,
+      fontWeightRegular: 400,
+      fontWeightMedium: 500,
+    },
+  },
   head: {
     backgroundColor: theme.palette.common.black,
     color: theme.palette.common.white,
+    fontSize: '0.3em',
   },
   body: {
-    fontSize: 14,
+    fontSize: '0.3em',
   },
 }))(TableCell)
 
 const styles = theme => ({
-  root: {
-    width: '100%',
-    marginTop: theme.spacing.unit * 3,
-    overflowX: 'auto',
-  },
-  table: {
-    minWidth: 700,
-  },
-  row: {
+  root: {},
+  tableRow: {
     '&:nth-of-type(odd)': {
       backgroundColor: theme.palette.background.default,
     },

@@ -24,7 +24,6 @@ const theme = createMuiTheme({
       contrastText: '#000',
     },
   },
-  typography: { useNextVariants: true },
 })
 
 // const API_URL = 'http://localhost:8080/graphql'

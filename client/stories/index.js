@@ -5,8 +5,8 @@ import AutocompleteInput from '../src/components/AutocompleteInput'
 import Autosuggest from '../src/components/AutosuggestInput'
 import CustomTable from '../src/components/CustomTable'
 import TextFields from '../src/components/TextFields'
-import Album from '../src/components/Album'
 import Layout from '../src/components/Layout'
+import GridLayout from '../src/components/GridLayout'
 
 const suggestions = [
   { label: 'Afghanistan' },
@@ -67,5 +67,5 @@ storiesOf('Misc', module)
   .add('Custom Table', () => <CustomTable />)
 
 storiesOf('Layout', module)
-  .add('default', () => <Album />)
-  .add('Second', () => <Layout />)
+  .add('Layout', () => <Layout />)
+  .add('Grid Layout', () => <GridLayout />)

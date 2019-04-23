@@ -18,6 +18,29 @@ import DeleteIcon from '@material-ui/icons/Delete'
 import FilterListIcon from '@material-ui/icons/FilterList'
 import { lighten } from '@material-ui/core/styles/colorManipulator'
 
+const CustomTableCell = withStyles(theme => ({
+  root: {
+    margin: 0,
+    padding: 0,
+  },
+  head: {
+    fontSize: '0.35em',
+    [theme.breakpoints.up('sm')]: {
+      fontSize: '1.2em',
+    },
+    margin: 0,
+    padding: 0,
+  },
+  body: {
+    fontSize: '0.25em',
+    [theme.breakpoints.up('sm')]: {
+      fontSize: '1em',
+    },
+    margin: 0,
+    padding: 0,
+  },
+}))(TableCell)
+
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
     return -1
@@ -56,12 +79,6 @@ class EnhancedTableHead extends React.Component {
 
     const rows = [
       {
-        id: 'id',
-        numeric: false,
-        disablePadding: true,
-        label: '',
-      },
-      {
         id: 'commuterLineID',
         numeric: false,
         disablePadding: false,
@@ -92,26 +109,20 @@ class EnhancedTableHead extends React.Component {
         <TableRow>
           {rows.map(
             row => (
-              <TableCell
+              <CustomTableCell
                 key={row.id}
                 align={'right'}
-                padding={row.disablePadding ? 'none' : 'default'}
+                padding={'none'}
                 sortDirection={orderBy === row.id ? order : false}
               >
-                <Tooltip
-                  title='Sort'
-                  placement={row.numeric ? 'bottom-end' : 'bottom-start'}
-                  enterDelay={300}
+                <TableSortLabel
+                  active={orderBy === row.id}
+                  direction={order}
+                  onClick={this.createSortHandler(row.id)}
                 >
-                  <TableSortLabel
-                    active={orderBy === row.id}
-                    direction={order}
-                    onClick={this.createSortHandler(row.id)}
-                  >
-                    {row.label}
-                  </TableSortLabel>
-                </Tooltip>
-              </TableCell>
+                  {row.label}
+                </TableSortLabel>
+              </CustomTableCell>
             ),
             this,
           )}
@@ -132,7 +143,7 @@ EnhancedTableHead.propTypes = {
 
 const toolbarStyles = theme => ({
   root: {
-    paddingRight: theme.spacing.unit,
+    paddingRight: 0,
   },
   highlight:
     theme.palette.type === 'light'
@@ -191,16 +202,15 @@ EnhancedTableToolbar.propTypes = {
 
 EnhancedTableToolbar = withStyles(toolbarStyles)(EnhancedTableToolbar)
 
-const styles = theme => ({
+export const styles = theme => ({
+  /* Styles applied to the root element. */
   root: {
+    display: 'table',
+    fontFamily: theme.typography.fontFamily,
     width: '100%',
-    overflowX: 'auto',
-  },
-  table: {
-    minWidth: 240,
-  },
-  tableWrapper: {
-    overflowX: 'auto',
+    borderCollapse: 'collapse',
+    borderSpacing: 0,
+    fontSize: '1em',
   },
   row: {
     '&:nth-of-type(odd)': {
@@ -334,24 +344,38 @@ class EnhancedTable extends React.Component {
                       selected={isSelected}
                       className={classes.row}
                     >
-                      <TableCell padding='checkbox' />
-                      <TableCell
+                      <CustomTableCell
                         component='th'
                         scope='row'
                         padding='none'
                         align='right'
                       >
                         <Typography>{trainLabel}</Typography>
-                      </TableCell>
-                      <TableCell align='right'>
+                      </CustomTableCell>
+                      <CustomTableCell
+                        component='th'
+                        padding='none'
+                        align='right'
+                        align='right'
+                      >
                         <Typography>{startStation}</Typography>
-                      </TableCell>
-                      <TableCell align='right'>
+                      </CustomTableCell>
+                      <CustomTableCell
+                        component='th'
+                        padding='none'
+                        align='right'
+                        align='right'
+                      >
                         <Typography>{endStation}</Typography>
-                      </TableCell>
-                      <TableCell align='right'>
+                      </CustomTableCell>
+                      <CustomTableCell
+                        component='th'
+                        padding='none'
+                        align='right'
+                        align='right'
+                      >
                         <Typography color={rowColor}>{timeLabel}</Typography>
-                      </TableCell>
+                      </CustomTableCell>
                     </TableRow>
                   )
                 })}
