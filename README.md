@@ -4,7 +4,7 @@
 
 Rataoppaasta näet kätevästi viimeisimmät junat joista myöhästyit.
 
-![](https://raw.githubusercontent.com/Zeukkari/harjotteluproggis3/master/rataopas.png)
+![](https://raw.githubusercontent.com/Zeukkari/rataopas/master/rataopas.png)
 
 
 ### Projektin taustalla GraphQL-treenausta
